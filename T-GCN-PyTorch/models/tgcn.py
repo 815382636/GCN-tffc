@@ -10,11 +10,12 @@ class TGCNGraphConvolution(nn.Module):
         self._num_gru_units = num_gru_units
         self._output_dim = output_dim
         self._bias_init_value = bias
+        # 拉普拉斯算子
         self.register_buffer('laplacian', calculate_laplacian_with_self_loop(torch.FloatTensor(adj)))
         self.weights = nn.Parameter(torch.FloatTensor(self._num_gru_units + 1, self._output_dim))
         self.biases = nn.Parameter(torch.FloatTensor(self._output_dim))
         self.reset_parameters()
-    
+
     def reset_parameters(self):
         nn.init.xavier_uniform_(self.weights)
         nn.init.constant_(self.biases, self._bias_init_value)
@@ -25,7 +26,7 @@ class TGCNGraphConvolution(nn.Module):
         inputs = inputs.reshape((batch_size, num_nodes, 1))
         # hidden_state (batch_size, num_nodes, num_gru_units)
         hidden_state = hidden_state.reshape((batch_size, num_nodes, self._num_gru_units))
-        # [x, h] (batch_size, num_nodes, num_gru_units + 1)
+        # [x, h] (batch_size, num_nodes, num__units + 1)
         concatenation = torch.cat((inputs, hidden_state), dim=2)
         # [x, h] (num_nodes, num_gru_units + 1, batch_size)
         concatenation = concatenation.transpose(0, 1).transpose(1, 2)
@@ -46,7 +47,7 @@ class TGCNGraphConvolution(nn.Module):
         # A[x, h]W + b (batch_size, num_nodes * output_dim)
         outputs = outputs.reshape((batch_size, num_nodes * self._output_dim))
         return outputs
-    
+
     @property
     def hyperparameters(self):
         return {
@@ -62,6 +63,8 @@ class TGCNCell(nn.Module):
         self._input_dim = input_dim
         self._hidden_dim = hidden_dim
         self.register_buffer('adj', torch.FloatTensor(adj))
+        # print('adj:')
+        # print(self.adj)
         self.graph_conv1 = TGCNGraphConvolution(self.adj, self._hidden_dim, self._hidden_dim * 2, bias=1.0)
         self.graph_conv2 = TGCNGraphConvolution(self.adj, self._hidden_dim, self._hidden_dim)
 
@@ -90,12 +93,13 @@ class TGCNCell(nn.Module):
 class TGCN(nn.Module):
     def __init__(self, adj, hidden_dim: int, **kwargs):
         super(TGCN, self).__init__()
-        self._input_dim = adj.shape[0]
+        self._input_dim = adj.shape[0]  # _input_dim: 207
+        # print("_input_dim:" + str(self._input_dim))
         self._hidden_dim = hidden_dim
+        #   将 标签 持久缓存
         self.register_buffer('adj', torch.FloatTensor(adj))
         self.tgcn_cell = TGCNCell(self.adj, self._input_dim, self._hidden_dim)
 
-    
     def forward(self, inputs):
         batch_size, seq_len, num_nodes = inputs.shape
         assert self._input_dim == num_nodes

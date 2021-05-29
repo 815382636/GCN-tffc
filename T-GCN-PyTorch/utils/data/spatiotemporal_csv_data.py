@@ -65,7 +65,7 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
         # print(self._adj)
         # print('--------------------------')
 
-    @staticmethod  # ????运行时间？？？？
+    @staticmethod
     def add_data_specific_arguments(parent_parser):
         """
             将 数据导入模型参入 加入全局参数

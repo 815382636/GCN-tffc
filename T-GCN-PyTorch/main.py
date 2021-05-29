@@ -26,6 +26,9 @@ def get_model(args, dm):
     if args.model_name == 'GCN':
         model = models.GCN(adj=dm.adj, input_dim=args.seq_len, output_dim=args.hidden_dim)
     if args.model_name == 'GRU':
+        """
+            
+        """
         model = models.GRU(input_dim=dm.adj.shape[0], hidden_dim=args.hidden_dim)
     if args.model_name == 'TGCN':
         """
@@ -33,8 +36,8 @@ def get_model(args, dm):
             hidden_dim: 隐藏层维度 ？ 64
             loss : 损失函数  mse  曲线对比方法
         """
-        print('hidden_dim：' + str(args.hidden_dim))
-        print('loss:' + str(args.loss))
+        # print('hidden_dim：' + str(args.hidden_dim))
+        # print('loss:' + str(args.loss))
         model = models.TGCN(adj=dm.adj, hidden_dim=args.hidden_dim, loss=args.loss)
     return model
 
