@@ -28,6 +28,13 @@ def get_model(args, dm):
     if args.model_name == 'GRU':
         model = models.GRU(input_dim=dm.adj.shape[0], hidden_dim=args.hidden_dim)
     if args.model_name == 'TGCN':
+        """
+            adj: 数据集标签 ？ 
+            hidden_dim: 隐藏层维度 ？ 64
+            loss : 损失函数  mse  曲线对比方法
+        """
+        print('hidden_dim：' + str(args.hidden_dim))
+        print('loss:' + str(args.loss))
         model = models.TGCN(adj=dm.adj, hidden_dim=args.hidden_dim, loss=args.loss)
     return model
 
@@ -78,7 +85,7 @@ if __name__ == '__main__':
     parser.add_argument('--data', type=str, help='The name of the dataset',
                         choices=('shenzhen', 'losloop'), default='losloop')
     parser.add_argument('--model_name', type=str, help='The name of the model for spatiotemporal prediction',
-                        choices=('GCN', 'GRU', 'TGCN'), default='GCN')
+                        choices=('GCN', 'GRU', 'TGCN'), default='TGCN')
     parser.add_argument('--settings', type=str, help='The type of settings, e.g. supervised learning',
                         choices=('supervised',), default='supervised')
 

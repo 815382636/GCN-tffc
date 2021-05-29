@@ -94,6 +94,7 @@ class TGCN(nn.Module):
         self._hidden_dim = hidden_dim
         self.register_buffer('adj', torch.FloatTensor(adj))
         self.tgcn_cell = TGCNCell(self.adj, self._input_dim, self._hidden_dim)
+
     
     def forward(self, inputs):
         batch_size, seq_len, num_nodes = inputs.shape
