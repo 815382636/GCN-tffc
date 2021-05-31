@@ -93,7 +93,7 @@ class GRU(nn.Module):
             output, hidden_state = self.gru_cell(inputs[:, i, :], hidden_state)
             output = output.reshape((batch_size, num_nodes, self._hidden_dim))
             outputs.append(output)
-        last_output = outputs[-1]
+        last_output = outputs[-1]           # 得到包含前面时间的最后一层特征点
         return last_output
 
     @staticmethod

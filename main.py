@@ -9,10 +9,11 @@ import utils.data
 import utils.email
 import utils.logging
 
-
 DATA_PATHS = {
     "shenzhen": {"feat": "data/sz_speed.csv", "adj": "data/sz_adj.csv"},
     "losloop": {"feat": "data/los_speed.csv", "adj": "data/los_adj.csv"},
+    "wenyi": {"feat": "data/wenyi_speed.csv", "adj": "data/wenyi_adj.csv"},
+    "allday": {"feat": "data/allday_week1.csv", "adj": "data/wenyi_adj.csv"}
 }
 
 
@@ -24,6 +25,8 @@ def get_model(args, dm):
         model = models.GRU(input_dim=dm.adj.shape[0], hidden_dim=args.hidden_dim)
     if args.model_name == "TGCN":
         model = models.TGCN(adj=dm.adj, hidden_dim=args.hidden_dim)
+    if args.model_name == "TCN":
+        model = models.TCN(input_dim=dm.adj.shape[0], num_channels=[10] * 8)
     if args.model_name == 'MSTTGCN':
         model = models.MSTTGCN(adj=dm.adj, num_inputs=args.hidden_dim, num_channels=[16, 16, 16, 16])
 
@@ -61,7 +64,7 @@ def main_supervised(args):
 
 
 def main(args):
-    rank_zero_info(vars(args))
+    rank_zero_info(vars(args))  # 将参数在训练前传入
     results = globals()["main_" + args.settings](args)
     return results
 
@@ -71,13 +74,14 @@ if __name__ == "__main__":
     parser = pl.Trainer.add_argparse_args(parser)
 
     parser.add_argument(
-        "--data", type=str, help="The name of the dataset", choices=("shenzhen", "losloop"), default="losloop"
+        "--data", type=str, help="The name of the dataset", choices=("shenzhen", "losloop", "wenyi", "allday"),
+        default="losloop"
     )
     parser.add_argument(
         "--model_name",
         type=str,
         help="The name of the model for spatiotemporal prediction",
-        choices=("GCN", "GRU", "TGCN", "MSTTGCN"),
+        choices=("GCN", "GRU", "TGCN", "TCN", "MSTTGCN"),
         default="GCN",
     )
     parser.add_argument(
