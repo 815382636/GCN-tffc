@@ -49,13 +49,13 @@ class TemporalBlock(nn.Module):
 class TCN(nn.Module):
     def __init__(self, input_dim, num_channels, kernel_size=2, dropout=0.2):
         super(TCN, self).__init__()
-        self._input_dim = input_dim  # num_nodes for prediction
+        self._input_dim = 1  # num_nodes for prediction
         self._hidden_dim = num_channels[-1]
         layers = []
         num_levels = len(num_channels)
         for i in range(num_levels):
             dilation_size = 2 ** i
-            in_channels = input_dim if i == 0 else num_channels[i - 1]
+            in_channels = 1 if i == 0 else num_channels[i - 1]
             out_channels = num_channels[i]
             layers += [TemporalBlock(in_channels, out_channels, kernel_size, stride=1, dilation=dilation_size,
                                      padding=(kernel_size - 1) * dilation_size, dropout=dropout)]
@@ -64,10 +64,20 @@ class TCN(nn.Module):
 
     def forward(self, inputs):
         batch_size, seq_len, num_nodes = inputs.shape
-        assert self._input_dim == num_nodes
+        # assert self._input_dim == num_nodes
+        # output = []
+        # for i in range(num_nodes):
+        #     mid_outputs = self.network(inputs[:, :, i].reshape((batch_size, 1, seq_len)))
+        #     output.append(mid_outputs[:, :, -1])
+        # output = torch.cat(output, 0)
+        # output = output.reshape(num_nodes, batch_size, self._hidden_dim)
+        # output = output.transpose(0, 1)
+
         inputs = inputs.transpose(1, 2)
-        output = self.network(inputs)
-        output = output.transpose(1, 2)
+        inputs = inputs.reshape(batch_size * num_nodes, 1, seq_len)
+        output = self.network(inputs)[:, :, -1]
+        output = output.reshape(batch_size, num_nodes, self._hidden_dim)
+
         return output
 
     @staticmethod
@@ -78,4 +88,4 @@ class TCN(nn.Module):
 
     @property
     def hyperparameters(self):
-        return {"input_dim": self._input_dim, "hidden_dim": self._hidden_dim}
+        return {"input_dim": 1, "hidden_dim": self._hidden_dim}

@@ -83,6 +83,8 @@ class GRU(nn.Module):
         self.gru_cell = GRUCell(self._input_dim, self._hidden_dim)
 
     def forward(self, inputs):
+        print('inputs:')
+        print(inputs.shape)
         batch_size, seq_len, num_nodes = inputs.shape
         assert self._input_dim == num_nodes
         outputs = list()
@@ -94,6 +96,8 @@ class GRU(nn.Module):
             output = output.reshape((batch_size, num_nodes, self._hidden_dim))
             outputs.append(output)
         last_output = outputs[-1]           # 得到包含前面时间的最后一层特征点
+        print('output:')
+        print(last_output.shape)
         return last_output
 
     @staticmethod

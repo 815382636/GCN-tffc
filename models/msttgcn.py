@@ -103,6 +103,7 @@ class MSTTGCN(nn.Module):
         self._node_num = adj.shape[0]
         self._hidden_dim = num_channels[-1]
         self.register_buffer('adj', torch.FloatTensor(adj))
+        self.num_inputs = num_inputs
         layers = []
         for i in range(len(num_channels)):
             dilation_size = 2 ** i
@@ -117,18 +118,28 @@ class MSTTGCN(nn.Module):
     def forward(self, inputs):
         batch_size, seq_len, num_nodes = inputs.shape
         assert self._node_num == num_nodes
-        gcn_output = []
-        for i in range(seq_len):
-            output = self.gcn(inputs[:, i, :].reshape((batch_size, num_nodes, 1)))
-            gcn_output.append(output)
-        gcn_output = torch.cat(gcn_output, 0)
-        end_output = []
-        for i in range(num_nodes):
-            output = self.network(gcn_output[:, :, i, :])
-            end_output.append(output)
-        end_output = torch.cat(end_output, 0)
-        end_output = end_output.transpose(0, 1)
-        return end_output[:, :, :, -1]
+        # gcn_output = []
+        # for i in range(seq_len):
+        #     output = self.gcn(inputs[:, i, :].reshape((batch_size, num_nodes, 1)))
+        #     gcn_output.append(output)
+        # gcn_output = torch.cat(gcn_output, 0)
+        # end_output = []
+        # for i in range(num_nodes):
+        #     output = self.network(gcn_output[:, :, i, :])
+        #     end_output.append(output)
+        # end_output = torch.cat(end_output, 0)
+        # end_output = end_output.transpose(0, 1)
+        # return end_output[:, :, :, -1]
+
+        inputs = inputs.reshape(batch_size * seq_len, num_nodes, 1)
+        output = self.gcn(inputs)
+        output = output.reshape(batch_size, seq_len, num_nodes, self.num_inputs)
+        output = output.transpose(1,2).transpose(2,3)
+        output = output.reshape(batch_size * num_nodes, self.num_inputs, seq_len)
+        output = self.network(output)[:, :, -1]
+        output = output.reshape(batch_size, num_nodes, self._hidden_dim)
+        return output
+
 
     @staticmethod
     def add_model_specific_arguments(parent_parser):

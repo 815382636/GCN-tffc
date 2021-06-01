@@ -26,9 +26,9 @@ def get_model(args, dm):
     if args.model_name == "TGCN":
         model = models.TGCN(adj=dm.adj, hidden_dim=args.hidden_dim)
     if args.model_name == "TCN":
-        model = models.TCN(input_dim=dm.adj.shape[0], num_channels=[10] * 8)
+        model = models.TCN(input_dim=dm.adj.shape[0], num_channels=[args.tcn_wid] * args.tcn_len)
     if args.model_name == 'MSTTGCN':
-        model = models.MSTTGCN(adj=dm.adj, num_inputs=args.hidden_dim, num_channels=[16, 16, 16, 16])
+        model = models.MSTTGCN(adj=dm.adj, num_inputs=args.hidden_dim, num_channels=[args.tcn_wid] * args.tcn_len)
 
     return model
 
@@ -42,7 +42,9 @@ def get_task(args, model, dm):
 
 def get_callbacks(args):
     checkpoint_callback = pl.callbacks.ModelCheckpoint(monitor="train_loss")
-    plot_validation_predictions_callback = utils.callbacks.PlotValidationPredictionsCallback(monitor="train_loss")
+    plot_validation_predictions_callback = utils.callbacks.PlotValidationPredictionsCallback(monitor="train_loss",
+                                                                                             data=args.data,
+                                                                                             model_name=args.model_name)
     callbacks = [
         checkpoint_callback,
         plot_validation_predictions_callback,
@@ -91,11 +93,14 @@ if __name__ == "__main__":
         choices=("supervised",),
         default="supervised",
     )
+    parser.add_argument("--tcn_len", type=int, default=8, help="TCN model TemporalBlock length")
+    parser.add_argument("--tcn_wid", type=int, default=10, help="TCN model TemporalBlock size")
     parser.add_argument("--log_path", type=str, default=None, help="Path to the output console log file")
     parser.add_argument("--send_email", "--email", action="store_true", help="Send email when finished")
 
     temp_args, _ = parser.parse_known_args()
 
+    #   将模型内设置的参入传入parser
     parser = getattr(utils.data, temp_args.settings.capitalize() + "DataModule").add_data_specific_arguments(parser)
     parser = getattr(models, temp_args.model_name).add_model_specific_arguments(parser)
     parser = getattr(tasks, temp_args.settings.capitalize() + "ForecastTask").add_task_specific_arguments(parser)

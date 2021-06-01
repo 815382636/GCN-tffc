@@ -1,13 +1,16 @@
 import torch
 import matplotlib.pyplot as plt
 from utils.callbacks.base import BestEpochCallback
+import os
 
 
 class PlotValidationPredictionsCallback(BestEpochCallback):
-    def __init__(self, monitor="", mode="min"):
+    def __init__(self, monitor="", mode="min", data="losloop", model_name="TCN"):
         super(PlotValidationPredictionsCallback, self).__init__(monitor=monitor, mode=mode)
         self.ground_truths = []
         self.predictions = []
+        self.data = data
+        self.model_name = model_name
 
     def on_fit_start(self, trainer, pl_module):
         self.ground_truths.clear()
@@ -27,6 +30,10 @@ class PlotValidationPredictionsCallback(BestEpochCallback):
         ground_truth = torch.cat(self.ground_truths, dim=0).cpu().numpy()
         predictions = torch.cat(self.predictions, dim=0).cpu().numpy()
         tensorboard = pl_module.logger.experiment
+        if not os.path.exists('img'):
+            os.system("mkdir -p img")
+        if not os.path.exists(f'img/{self.data}'):
+            os.system(f"mkdir -p img/{self.data}")
         for node_idx in range(ground_truth.shape[1]):
             plt.clf()
             plt.rcParams["font.family"] = "Times New Roman"
@@ -46,6 +53,7 @@ class PlotValidationPredictionsCallback(BestEpochCallback):
             plt.legend(loc="best", fontsize=10)
             plt.xlabel("Time")
             plt.ylabel("Traffic Speed")
+            plt.savefig(f'img/{self.data}/{self.data}_{node_idx}_{self.model_name}.jpg')
             tensorboard.add_figure(
                 "Prediction result of node " + str(node_idx),
                 fig,

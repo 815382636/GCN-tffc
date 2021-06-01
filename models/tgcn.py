@@ -110,6 +110,8 @@ class TGCN(nn.Module):
         self.tgcn_cell = TGCNCell(self.adj, self._input_dim, self._hidden_dim)
 
     def forward(self, inputs):
+        print('inputs:')
+        print(inputs.shape)
         batch_size, seq_len, num_nodes = inputs.shape
         assert self._input_dim == num_nodes
         hidden_state = torch.zeros(batch_size, num_nodes * self._hidden_dim).type_as(
@@ -119,6 +121,8 @@ class TGCN(nn.Module):
         for i in range(seq_len):
             output, hidden_state = self.tgcn_cell(inputs[:, i, :], hidden_state)
             output = output.reshape((batch_size, num_nodes, self._hidden_dim))
+        print('outputs:')
+        print(output.shape)
         return output
 
     @staticmethod

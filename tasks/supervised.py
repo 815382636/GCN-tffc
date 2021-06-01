@@ -10,24 +10,25 @@ import utils.losses
 
 class SupervisedForecastTask(pl.LightningModule):
     def __init__(
-        self,
-        model: nn.Module,
-        regressor="linear",
-        loss="mse",
-        pre_len: int = 3,
-        learning_rate: float = 1e-3,
-        weight_decay: float = 1.5e-3,
-        feat_max_val: float = 1.0,
-        **kwargs
+            self,
+            model: nn.Module,
+            regressor="linear",
+            loss="mse",
+            pre_len: int = 3,
+            learning_rate: float = 1e-3,
+            weight_decay: float = 1.5e-3,
+            feat_max_val: float = 1.0,
+            **kwargs
     ):
         super(SupervisedForecastTask, self).__init__()
-        self.save_hyperparameters()
+        # self.save_hyperparameters()
         self.model = model
         self.regressor = (
             nn.Linear(
-                self.model.hyperparameters.get("hidden_dim")
-                or self.model.hyperparameters.get("output_dim"),
-                self.hparams.pre_len,
+                # self.model.hyperparameters.get("hidden_dim")
+                # or self.model.hyperparameters.get("output_dim"),
+                # self.hparams.pre_len,
+                10, 1
             )
             if regressor == "linear"
             else regressor
@@ -40,6 +41,8 @@ class SupervisedForecastTask(pl.LightningModule):
         batch_size, _, num_nodes = x.size()
         # (batch_size, num_nodes, hidden_dim)
         hidden = self.model(x)
+        # print('hidden:')
+        # print(hidden.shape)
         # (batch_size * num_nodes, hidden_dim)
         hidden = hidden.reshape((-1, hidden.size(2)))
         # (batch_size * num_nodes, pre_len)
@@ -47,7 +50,10 @@ class SupervisedForecastTask(pl.LightningModule):
             predictions = self.regressor(hidden)
         else:
             predictions = hidden
+        # print('predictions:')
+        # print(predictions.shape)
         predictions = predictions.reshape((batch_size, num_nodes, -1))
+        # print(predictions.shape)
         return predictions
 
     def shared_step(self, batch, batch_idx):
@@ -99,8 +105,10 @@ class SupervisedForecastTask(pl.LightningModule):
     def configure_optimizers(self):
         return torch.optim.Adam(
             self.parameters(),
-            lr=self.hparams.learning_rate,
-            weight_decay=self.hparams.weight_decay,
+            # lr=self.hparams.learning_rate,
+            # weight_decay=self.hparams.weight_decay,
+            lr=1e-3,
+            weight_decay=1.5e-3
         )
 
     @staticmethod
