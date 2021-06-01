@@ -41,8 +41,6 @@ class SupervisedForecastTask(pl.LightningModule):
         batch_size, _, num_nodes = x.size()
         # (batch_size, num_nodes, hidden_dim)
         hidden = self.model(x)
-        # print('hidden:')
-        # print(hidden.shape)
         # (batch_size * num_nodes, hidden_dim)
         hidden = hidden.reshape((-1, hidden.size(2)))
         # (batch_size * num_nodes, pre_len)
@@ -50,10 +48,7 @@ class SupervisedForecastTask(pl.LightningModule):
             predictions = self.regressor(hidden)
         else:
             predictions = hidden
-        # print('predictions:')
-        # print(predictions.shape)
         predictions = predictions.reshape((batch_size, num_nodes, -1))
-        # print(predictions.shape)
         return predictions
 
     def shared_step(self, batch, batch_idx):
