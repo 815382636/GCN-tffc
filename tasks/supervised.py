@@ -6,6 +6,7 @@ import pytorch_lightning as pl
 import torchmetrics
 import utils.metrics
 import utils.losses
+import models
 
 
 class SupervisedForecastTask(pl.LightningModule):
@@ -21,14 +22,13 @@ class SupervisedForecastTask(pl.LightningModule):
             **kwargs
     ):
         super(SupervisedForecastTask, self).__init__()
-        # self.save_hyperparameters()
+        self.save_hyperparameters()
         self.model = model
         self.regressor = (
             nn.Linear(
-                # self.model.hyperparameters.get("hidden_dim")
-                # or self.model.hyperparameters.get("output_dim"),
-                # self.hparams.pre_len,
-                10, 1
+                self.model.hyperparameters.get("hidden_dim")
+                or self.model.hyperparameters.get("output_dim"),
+                self.hparams.pre_len,
             )
             if regressor == "linear"
             else regressor
@@ -100,10 +100,8 @@ class SupervisedForecastTask(pl.LightningModule):
     def configure_optimizers(self):
         return torch.optim.Adam(
             self.parameters(),
-            # lr=self.hparams.learning_rate,
-            # weight_decay=self.hparams.weight_decay,
-            lr=1e-3,
-            weight_decay=1.5e-3
+            lr=self.hparams.learning_rate,
+            weight_decay=self.hparams.weight_decay,
         )
 
     @staticmethod

@@ -12,7 +12,7 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
         adj_path: str,
         batch_size: int = 64,
         seq_len: int = 12,
-        pre_len: int = 3,
+        pre_len: int = 1,
         split_ratio: float = 0.8,
         normalize: bool = True,
         **kwargs

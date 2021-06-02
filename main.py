@@ -26,7 +26,7 @@ def get_model(args, dm):
     if args.model_name == "TGCN":
         model = models.TGCN(adj=dm.adj, hidden_dim=args.hidden_dim)
     if args.model_name == "TCN":
-        model = models.TCN(input_dim=dm.adj.shape[0], num_channels=[args.tcn_wid] * args.tcn_len)
+        model = models.TCN(num_channels=[args.tcn_wid] * args.tcn_len)
     if args.model_name == 'MSTTGCN':
         model = models.MSTTGCN(adj=dm.adj, num_inputs=args.hidden_dim, num_channels=[args.tcn_wid] * args.tcn_len)
 
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         type=str,
         help="The name of the model for spatiotemporal prediction",
         choices=("GCN", "GRU", "TGCN", "TCN", "MSTTGCN"),
-        default="GCN",
+        default="TCN",
     )
     parser.add_argument(
         "--settings",
@@ -93,8 +93,8 @@ if __name__ == "__main__":
         choices=("supervised",),
         default="supervised",
     )
-    parser.add_argument("--tcn_len", type=int, default=8, help="TCN model TemporalBlock length")
-    parser.add_argument("--tcn_wid", type=int, default=10, help="TCN model TemporalBlock size")
+    parser.add_argument("--tcn_len", type=int, default=4, help="TCN model TemporalBlock level")
+    parser.add_argument("--tcn_wid", type=int, default=10, help="TCN model TemporalBlock hidden")
     parser.add_argument("--log_path", type=str, default=None, help="Path to the output console log file")
     parser.add_argument("--send_email", "--email", action="store_true", help="Send email when finished")
 
