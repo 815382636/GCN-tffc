@@ -36,7 +36,7 @@ class MSTTGCN(nn.Module):
     def forward(self, inputs):
         batch_size, seq_len, num_nodes = inputs.shape
         assert self._node_num == num_nodes
-        inputs = inputs.reshape(batch_size * seq_len, num_nodes, 1)
+        inputs = inputs.reshape(batch_size * seq_len, 1, num_nodes)
         output = self.gcn(inputs)
         output = output.reshape(batch_size, seq_len, num_nodes, self.num_inputs)
         output = output.transpose(1, 2).transpose(2, 3)

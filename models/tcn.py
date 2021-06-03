@@ -52,8 +52,7 @@ class TCN(nn.Module):
         self._input_dim = fea_num  # 特征数
         self._hidden_dim = num_channels[-1]
         layers = []
-        num_levels = len(num_channels)
-        for i in range(num_levels):
+        for i in range(len(num_channels)):
             dilation_size = 2 ** i
             in_channels = fea_num if i == 0 else num_channels[i - 1]
             out_channels = num_channels[i]
