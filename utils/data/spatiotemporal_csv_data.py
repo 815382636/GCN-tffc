@@ -15,6 +15,7 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
         pre_len: int = 1,
         split_ratio: float = 0.8,
         normalize: bool = True,
+        num_worker: int = 0,
         **kwargs
     ):
         super(SpatioTemporalCSVDataModule, self).__init__()
@@ -28,6 +29,7 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
         self._feat = utils.data.functions.load_features(self._feat_path)
         self._feat_max_val = np.max(self._feat)
         self._adj = utils.data.functions.load_adjacency_matrix(self._adj_path)
+        self.num_worker = num_worker
 
     @staticmethod
     def add_data_specific_arguments(parent_parser):
@@ -37,6 +39,8 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
         parser.add_argument("--pre_len", type=int, default=3)
         parser.add_argument("--split_ratio", type=float, default=0.8)
         parser.add_argument("--normalize", type=bool, default=True)
+        parser.add_argument("--num_worker", type=int, default=0)
+
         return parser
 
     def setup(self, stage: str = None):
@@ -52,10 +56,10 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
         )
 
     def train_dataloader(self):
-        return DataLoader(self.train_dataset, batch_size=self.batch_size)
+        return DataLoader(self.train_dataset, batch_size=self.batch_size, num_workers=self.num_worker)
 
     def val_dataloader(self):
-        return DataLoader(self.val_dataset, batch_size=len(self.val_dataset))
+        return DataLoader(self.val_dataset, batch_size=len(self.val_dataset), num_workers=self.num_worker)
 
     @property
     def feat_max_val(self):
