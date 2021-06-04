@@ -47,6 +47,9 @@ Fork frame from [T-GCN-PyTorch](https://img.shields.io/github/stars/martinwhl/T-
   $ python main.py --model_name TCN --max_epochs 3000 --learning_rate 0.001 --weight_decay 0 --batch_size 64 --hidden_dim 100 --settings supervised --gpus 1 --pre_len 1
   # MSTTGCN
   $ python main.py --model_name MSTTGCN --max_epochs 3000 --learning_rate 0.001 --weight_decay 0 --batch_size 32 --hidden_dim 64 --loss mse --settings supervised --gpus 1 --pre_len 1
+  # TCGCN
+  $ python main.py --model_name TCGCN --max_epochs 3000 --learning_rate 0.001 --weight_decay 0 --batch_size 32 --hidden_dim 64 --loss mse --settings supervised --gpus 1 --pre_len 1
+
 ```
 
 ## <span id="p4">调参(对上一步模型训练命令进行修改)</span>

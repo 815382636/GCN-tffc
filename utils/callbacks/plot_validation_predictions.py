@@ -36,7 +36,7 @@ class PlotValidationPredictionsCallback(BestEpochCallback):
             os.system(f"mkdir -p img/{self.data}")
         for node_idx in range(ground_truth.shape[1]):
             plt.clf()
-            plt.rcParams["font.family"] = "Times New Roman"
+            plt.rcParams["font.serif"] = "Times New Roman"
             fig = plt.figure(figsize=(7, 2), dpi=300)
             plt.plot(
                 ground_truth[:, node_idx],
