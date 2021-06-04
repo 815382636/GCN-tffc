@@ -27,9 +27,10 @@ def get_model(args, dm):
         model = models.TGCN(adj=dm.adj, hidden_dim=args.hidden_dim)
     if args.model_name == "TCN":
         model = models.TCN(num_channels=[args.tcn_wid] * args.tcn_len)
-    if args.model_name == 'MSTTGCN':
+    if args.model_name == "MSTTGCN":
         model = models.MSTTGCN(adj=dm.adj, num_inputs=args.hidden_dim, num_channels=[args.tcn_wid] * args.tcn_len)
-
+    if args.model_name == "TCGCN":
+        model = models.TCGCN(adj=dm.adj, num_channels=[args.tcn_wid] * args.tcn_len)
     return model
 
 
@@ -83,7 +84,7 @@ if __name__ == "__main__":
         "--model_name",
         type=str,
         help="The name of the model for spatiotemporal prediction",
-        choices=("GCN", "GRU", "TGCN", "TCN", "MSTTGCN"),
+        choices=("GCN", "GRU", "TGCN", "TCN", "MSTTGCN", "TCGCN"),
         default="TCN",
     )
     parser.add_argument(
