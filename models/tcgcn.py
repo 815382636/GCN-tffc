@@ -14,19 +14,19 @@ class TB(nn.Module):
         self.conv1 = weight_norm(nn.Conv1d(n_inputs, n_outputs, kernel_size,
                                            stride=stride, padding=padding, dilation=dilation))
         self.chomp1 = Chomp1d(padding)
-        self.LeakyReLU1 = nn.LeakyReLU()
+        self.relu1 = nn.ReLU()
         self.dropout1 = nn.Dropout(dropout)
 
         self.conv2 = weight_norm(nn.Conv1d(n_outputs, n_outputs, kernel_size,
                                            stride=stride, padding=padding, dilation=dilation))
         self.chomp2 = Chomp1d(padding)
-        self.LeakyReLU2 = nn.LeakyReLU()
+        self.relu2 = nn.ReLU()
         self.dropout2 = nn.Dropout(dropout)
 
-        self.net = nn.Sequential(self.conv1, self.chomp1, self.LeakyReLU1, self.dropout1,
-                                 self.conv2, self.chomp2, self.LeakyReLU2, self.dropout2)
+        self.net = nn.Sequential(self.conv1, self.chomp1, self.relu1, self.dropout1,
+                                 self.conv2, self.chomp2, self.relu2, self.dropout2)
         self.downsample = nn.Conv1d(n_inputs, n_outputs, 1) if n_inputs != n_outputs else None
-        self.LeakyReLU = nn.LeakyReLU()
+        self.relu = nn.ReLU()
         self.init_weights()
         self.gcn = GCN(adj, n_outputs, n_outputs)
 
@@ -41,7 +41,7 @@ class TB(nn.Module):
         x = x.reshape(batch_size * num_nodes, val_num, seq_len)
         out = self.net(x)
         res = x if self.downsample is None else self.downsample(x)
-        output = self.LeakyReLU(out + res)
+        output = self.relu(out + res)
         output = output.reshape(batch_size, num_nodes, self._outputs, seq_len)
         output = output.transpose(1, 3)
         output = output.reshape(batch_size * seq_len, self._outputs, num_nodes)
