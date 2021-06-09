@@ -54,6 +54,7 @@ class TB1(nn.Module):
 class NTCGCN(nn.Module):
     def __init__(self, adj, num_channels, val_num=1, kernel_size=2, dropout=0.2):
         super(NTCGCN, self).__init__()
+        self._val_num = val_num
         self._node_num = adj.shape[0]
         self._hidden_dim = num_channels[-1]
         self.register_buffer('adj', torch.FloatTensor(adj))
