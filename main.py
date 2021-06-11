@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
     temp_args, _ = parser.parse_known_args()
 
-    #   将模型内设置的参入传入parser
+    #   将模型内设置的参数传入parser
     parser = getattr(utils.data, temp_args.settings.capitalize() + "DataModule").add_data_specific_arguments(parser)
     parser = getattr(models, temp_args.model_name).add_model_specific_arguments(parser)
     parser = getattr(tasks, temp_args.settings.capitalize() + "ForecastTask").add_task_specific_arguments(parser)
