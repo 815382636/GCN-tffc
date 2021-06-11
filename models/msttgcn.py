@@ -5,41 +5,6 @@ from utils.graph_conv import calculate_laplacian_with_self_loop
 from torch.nn.utils import weight_norm
 from models.gcn import GCN
 from models.tcn import TemporalBlock
-from torch.nn import Parameter
-import math
-
-
-class GraphConvolution(nn.Module):
-    """
-    Simple GCN layer, similar to https://arxiv.org/abs/1609.02907
-    """
-
-    def __init__(self, adj, in_features, out_features, bias=False):
-        super(GraphConvolution, self).__init__()
-        self.in_features = in_features
-        self.out_features = out_features
-        self.register_buffer('adj', torch.FloatTensor(adj))
-        self.weight = Parameter(torch.Tensor(in_features, out_features))
-        if bias:
-            self.bias = Parameter(torch.Tensor(1, 1, out_features))
-        else:
-            self.register_parameter('bias', None)
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        stdv = 1. / math.sqrt(self.weight.size(1))
-        self.weight.data.uniform_(-stdv, stdv)
-        if self.bias is not None:
-            self.bias.data.uniform_(-stdv, stdv)
-
-    def forward(self, input):
-        input = input.transpose(1, 2)
-        support = torch.matmul(input, self.weight)
-        output = torch.matmul(self.adj, support)
-        if self.bias is not None:
-            return output + self.bias
-        else:
-            return output
 
 
 class MSTTGCN(nn.Module):
@@ -65,7 +30,7 @@ class MSTTGCN(nn.Module):
             layers += [TemporalBlock(in_channels, out_channels, kernel_size, stride=1, dilation=dilation_size,
                                      padding=(kernel_size - 1) * dilation_size, dropout=dropout)]
 
-        self.gcn = GraphConvolution(adj, val_num, num_inputs)
+        self.gcn = GCN(adj, val_num, num_inputs)
         self.network = nn.Sequential(*layers)
 
     def forward(self, inputs):
